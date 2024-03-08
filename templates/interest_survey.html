@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interest Survey</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_quiz.css') }}">
+    <style>
+        /* Custom styling for sliders */
+        .slider-container {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 90%;
+            height: 15px; /* Adjusted height */
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            margin-bottom: 5px; /* Added spacing */
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px; /* Adjusted thumb size */
+            height: 20px; /* Adjusted thumb size */
+            border-radius: 50%;
+            background: #4caf50;
+            cursor: pointer;
+            margin-top: -3px; /* Adjusted thumb position */
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px; /* Adjusted thumb size */
+            height: 20px; /* Adjusted thumb size */
+            border-radius: 50%;
+            background: #4caf50;
+            cursor: pointer;
+            margin-top: -3px; /* Adjusted thumb position */
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px; /* Adjusted margin */
+            font-size: 14px; /* Increased font size */
+        }
+
+        .slider-labels span {
+            width: calc(100% / 5); /* Adjusted width for 5 labels */
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>Interest Survey</h1>
+            <h2>Submit a survey reflecting your level of agreement or disagreement with the provided questions.</h2>
+        </div>
+        <div class="main-content">
+            <form action="{{ url_for('interest_survey') }}" method="POST"> <!-- Added form tag -->
+                <div class="question-section">
+                    {% for question, options in question_option_pairs %}
+                    <div class="question" style="margin-bottom: 10px;">Que: {{ question }}</div> <!-- Adjusted spacing -->
+                    <div class="options">
+                        <div class="slider-container">
+                            <input type="range" min="1" max="{{ options|length }}" value="3" class="slider"
+                                id="{{ question }}" name="{{ question }}"> <!-- Added name attribute -->
+                            <div class="slider-labels">
+                                <span>Fully Agree</span>
+                                <span>Agree</span>
+                                <span>Neutral</span>
+                                <span>Disagree</span>
+                                <span>Fully Disagree</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <br>
+                <div class="button-section">
+                    <button class="start-quiz-btn" type="submit">Submit Survey</button> <!-- Changed button type to submit -->
+                    <a href="{{ url_for('show_results') }}">
+                        <button class="start-quiz-btn" type="button">Head to Results</button>
+                    </a>
+                </div>
+            </form> <!-- Closed form tag -->
+        </div>
+    </div>
+</body>
+
+</html>

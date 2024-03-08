@@ -1,0 +1,24 @@
+database: careerguidance
+
+CREATE TABLE student_accounts (
+    email VARCHAR(50) UNIQUE,
+    name VARCHAR(255),
+    student_class INT,
+    password VARCHAR(255),
+    PRIMARY KEY (email)
+);
+
+CREATE TABLE student_data(
+    email VARCHAR(50) UNIQUE,
+    interest VARCHAR(255),
+    grades_math int(3),
+    grades_sci int(3),
+    grades_eng int(3),
+    grades_ss int(3),
+    grades_comp int(3),
+    
+    PRIMARY KEY (email),
+    
+    FOREIGN KEY (email) REFERENCES student_accounts(email)
+);
+
