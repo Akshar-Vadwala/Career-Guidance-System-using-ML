@@ -2,66 +2,32 @@
 <html lang="en">
 
 <head>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
-            margin: 20px;
-            text-align: center;
-        }
-
-        .container {
-            border: 1px solid #ccc;
-            padding: 20px;
-            width: 300px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: #4caf50;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: #4caf50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-            margin: 10px;
-            text-decoration: none; /* Remove default link underline */
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-    </style>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_complete.css') }}">
     <title>Results</title>
 </head>
 
 <body>
     <div class="container">
-    <h1>Your Results:</h1>
-    
-    {% if academic_result %}
-        <h2>Academic Result:</h2>
-        <p>{{ academic_result }}/15</p>
-    {% endif %}
-    
-    {% if aptitude_result %}
-        <h2>Aptitude Result:</h2>
-        <p>{{ aptitude_result }}/5</p>
-    {% endif %}
-    
-    <p>You have successfully completed the quiz.</p>
-    <p>Thank you for participating.</p>
-</div>
+        <h1>Your Results:</h1>
+        
+        {% if academic_result %}
+            <h2>Academic Result:</h2>
+            <p>{{ academic_result }}/15</p>
+        {% endif %}
+        
+        {% if aptitude_result %}
+            <h2>Aptitude Result:</h2>
+            <p>{{ aptitude_result }}/5</p>
+        {% endif %}
+        
+        <p>You have successfully completed the quiz.</p>
+        <p>Thank you for participating.</p>
+        
+        <a href="{{ url_for('show_prediction') }}" class="btn">Show Prediction</a>
+        
+    </div>
 
 </body>
 

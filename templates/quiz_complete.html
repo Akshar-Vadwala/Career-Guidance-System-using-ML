@@ -2,58 +2,19 @@
 <html lang="en">
 
 <head>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
-            margin: 20px;
-            text-align: center;
-        }
-
-        .container {
-            border: 1px solid #ccc;
-            padding: 20px;
-            width: 300px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: #4caf50;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: #4caf50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-            margin: 10px;
-            text-decoration: none; /* Remove default link underline */
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-    </style>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_complete.css') }}">
     <title>Quiz Complete</title>
 </head>
 
 <body>
     <div class="container">
         <h1>Congratulations!</h1>
-        <p>You have successfully completed the quiz.</p>
-        <p>Thank you for participating.</p>
+        <p>You have successfully completed the quiz. Now, it's time to give a survey based on your interests.</p>
+        <p>Thank you for participating!</p>
         
         <a href="{{ url_for('interest_survey') }}" class="btn">Give a Survey</a>
-        <a href="{{ url_for('show_results') }}" class="btn">Head to Results</a>
-        
     </div>
 </body>
 

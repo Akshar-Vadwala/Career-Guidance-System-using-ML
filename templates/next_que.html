@@ -11,22 +11,23 @@
 <body>
     <div class="container">
         <div class="sidebar">
-            <!-- Sidebar content can be added here if needed -->
+           
         </div>
         <div class="main-content">
             <div class="question-section">
-                <div class="question-text">
-                    <span class="answer-heading">Question:</span> {{ question }}
+               <div>
+                    <span id="question-number">Question:</span> <span id="question-text">{{ question }}</span>
                 </div>
-                <h3 class="answer-heading">Your Answer:</h3>
-                <div class="selected-option">Option {{ selected_option }}: {{selected_option_text}}</div>
-                <h3 class="answer-heading">Correct Answer:</h3>
-                <div class="correct-option">Option {{ correct_option }}: {{correct_option_text}}</div>
+
+                <h2 class="answer-heading">Your Answer:</h2>
+                    <div class="answer-choice">Option {{ selected_option }}: {{selected_option_text}}</div>
+                <h2 class="answer-heading">Correct Answer:</h2>
+                    <div class="answer-choice">Option {{ correct_option }}: {{correct_option_text}}</div>
             </div>
             <br>
             <div class="button-section">
-                <a href="{{ url_for('start_quiz', section=section, question_number=question_number+1) }}">
-                    <button class="start-quiz-btn" type="button">Next Question</button>
+                <a href="{{ url_for('start_quiz', section=section, question_number=question_number+1) }}" class="quiz-link">
+                    <button class="quiz-btn" type="button">Next Question</button>
                 </a>
             </div>
         </div>

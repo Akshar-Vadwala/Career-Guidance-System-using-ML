@@ -4,6 +4,11 @@ import pandas as pd
 import json
 import random
 from datetime import datetime
+import joblib
+
+from werkzeug.routing import BuildError
+from jinja2.exceptions import TemplateNotFound
+
 
 app= Flask(__name__)
 
@@ -16,7 +21,8 @@ app.config['MYSQL_DB'] = 'careerguidance'
 
 mysql = MySQL(app)
 
-app.secret_key = 'ekdjo39ijdowdpwmdo39'  #for session management
+app.secret_key = 'ekdjo39ijdowdpwmdo39'
+
 
 
 #student login page
@@ -149,13 +155,15 @@ def quiz():
 def random_que(tag, df, difficulty):
     df['difficulty'] = df['difficulty'].astype(int)
     
-    tag_df = df[(df['tag'] == tag) & (df['difficulty'] == difficulty)]
+    if tag != 0:
+        tag_df = df[(df['tag'] == tag) & (df['difficulty'] == difficulty)]
+        return tag_df.sample(n=1).iloc[0]
+    else:
+        tag_df = df[df['difficulty'] == difficulty]
+        return tag_df.sample(n=1).iloc[0]
     
-    if tag_df.empty:
         
-        raise ValueError("No questions found for the given tag and difficulty")
-    
-    return tag_df.sample(n=1).iloc[0]
+        
 
 tag_difficulty_levels = {
     'Computer': 3,
@@ -244,28 +252,35 @@ def start_quiz(section, question_number):
         
         elif section == 'aptitude':
             
-            if question_number <= 5:
+            if question_number < 5:
+                app.logger.info("Que: %s", question_number)
                 
-                selected_question = ques_set_aptitude.iloc[question_number - 1]
+                difficulty = question_number + 1  # Set difficulty to question_number + 1
+                app.logger.info("Difficulty: %s", difficulty)
+                
+                selected_question = random_que(0, ques_set_aptitude, difficulty) 
                 
                 selected_question_json = selected_question.to_json()
                 session['selected_question'] = selected_question_json 
                 session['question_number'] = question_number
                 session['section'] = section
-    
-                options = [
-                    {'index': i, 'text': selected_question[f'option{i}']} for i in range(1, 5)
-                ]
-               
-                next_question_number = question_number + 1
+                
+                image_path = selected_question['image']
+                
+                if pd.notna(image_path):
+                    image = image_path
+                else:
+                    image = None 
+                
+                options = [{'index': i, 'text': selected_question[f'option{i}']} for i in range(1, 5)]
+                
+            else:
+                return redirect(url_for('quiz_complete'))
 
-                if next_question_number == 6:
-                    return redirect(url_for('quiz_complete'))
 
-                return render_template('start_quiz.html', question=selected_question, options=options, section='aptitude',
-                                       question_number=next_question_number)
-            
-        session.pop('tag_difficulty_levels')
+        
+        return render_template('start_quiz.html', question=selected_question, options=options, section='aptitude',
+                                       question_number=difficulty, image=image)
     
     else:
         return redirect(url_for('student_login'))
@@ -345,21 +360,6 @@ def next_que():
     else:
         return redirect(url_for('student_login'))
     
-#Interest Survey
-@app.route('/interest-survey', methods=['GET','POST'])
-def interest_survey():
-    if 'email' in session:
-        
-        ques_set_interest_survey = pd.read_csv("interest_survey_que.csv")
-        questions = ques_set_interest_survey['question'].tolist()
-        options = ques_set_interest_survey[['option1', 'option2', 'option3', 'option4', 'option5']].values.tolist()
-        
-        
-        question_option_pairs = zip(questions, options)
-        
-        return render_template('interest_survey.html', question_option_pairs=question_option_pairs)
-    else:
-        return redirect(url_for('student_login'))
 
 
 @app.route('/quiz_complete', methods=['GET', 'POST'])
@@ -367,6 +367,7 @@ def quiz_complete():
     if 'email' in session:
         global aptitude_score
         
+            
         email = session.get('email')
         quiz_date = datetime.now().strftime('%Y-%m-%d')
         quiz_id = f'Q_{quiz_date}_1'
@@ -439,6 +440,41 @@ def quiz_complete():
         return render_template('quiz_complete.html')    
     else:
         return redirect(url_for('student_login'))
+    
+#Interest Survey
+@app.route('/interest-survey', methods=['GET','POST'])
+def interest_survey():
+    if 'email' in session:
+        
+        ques_set_interest_survey = pd.read_csv("Datasets/interest_survey_que.csv")
+        questions = ques_set_interest_survey['question'].tolist()
+        options = ques_set_interest_survey[['option1', 'option2', 'option3', 'option4', 'option5']].values.tolist()
+        streams = ques_set_interest_survey['stream'].tolist()
+        
+        if request.method == 'POST':
+            
+            science = request.form.get('science')
+            commerce = request.form.get('commerce')
+            arts = request.form.get('arts')
+            general1 = request.form.get('general1')
+            general2 = request.form.get('general2')
+            
+            quiz_id = session.get('quiz_id')
+            
+            cursor = mysql.connection.cursor()
+            cursor.execute("UPDATE student_scores SET science=%s, commerce=%s, arts=%s, general1=%s, general2=%s where quiz_id =%s",(science,commerce,arts,general1,general2,quiz_id))
+            result = cursor.rowcount
+            mysql.connection.commit()
+            
+            cursor.close()
+            
+            if result:
+                return redirect(url_for('show_results'))
+        
+        return render_template('interest_survey.html', questions = questions, options =options, streams = streams)
+    else:
+        return redirect(url_for('student_login'))
+
 
 
 #Show Results page
@@ -447,16 +483,83 @@ def show_results():
     if 'email' in session:
         global academic_result
         global aptitude_result
-       
-        
-        
+      
         return render_template('show_results.html', academic_result = academic_result, aptitude_result = aptitude_result)
             
     else:
         return redirect(url_for('student_login'))
 
+#Show predictions
+@app.route('/show_prediction')
+def show_prediction():
+    if 'email' in session: 
+        email = session.get('email')
+        quiz_id = session.get('quiz_id')
+        
+        
+        
+        feature_names = ['grades_math', 'grades_sci', 'grades_eng', 'grades_ss', 'grades_comp',
+                         'Computer', 'CivilServices', 'MarketingSales', 'Science', 'Mathematics',
+                         'SocialSciencesHumanities', 'PerformingFineArts', 'Business', 'FinanceAccounting',
+                         'Healthcare', 'Aptitude', 'science', 'commerce', 'arts', 'general1', 'general2']
+        
+        feature_values = []
+        
+        cursor = mysql.connection.cursor()
+        
+        cursor.execute("SELECT * FROM student_data WHERE email=%s", (email,))
+        grades = cursor.fetchone()
+        
+        if grades:
+            feature_values.extend([grades[2], grades[3], grades[4], grades[5], grades[6]])
 
+        cursor.execute("SELECT * FROM student_scores WHERE quiz_id=%s", (quiz_id,))
+        scores = cursor.fetchone()
+        
+        if scores:
+            feature_values.extend([scores[3], scores[4], scores[5], scores[6], scores[7], scores[8],
+                                    scores[9], scores[10], scores[11], scores[12], scores[13], 
+                                    scores[14], scores[15], scores[16], scores[17], scores[18]])
+        
+        cursor.close()
+        
+        feature_df = pd.DataFrame([feature_values], columns=feature_names)
+        
+        model = joblib.load("random_forest_model.pkl")
+        
+        prediction = model.predict(feature_df)
+        print(prediction)
+        if prediction < 1.5:
+            stream = "Science"
+            content="1"
+        elif prediction < 2.5:
+            stream = "Commerce"
+            content= "2"
+        else:
+            stream = "Arts"
+            content= "3"
 
+        session.clear()
+        
+        return render_template('show_prediction.html', stream=stream, content=content)
+    else:
+        return redirect(url_for('student_login'))
+
+@app.errorhandler(404)
+@app.errorhandler(500)
+@app.errorhandler(505)
+def handle_errors(error):
+    return render_template('error.html'), error.code
+
+@app.errorhandler(BuildError)
+def handle_build_error(error):
+    return render_template('error.html'), 500  
+
+@app.errorhandler(TemplateNotFound)
+def template_not_found(error):
+    return render_template('error.html'), 404
+
+   
    
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
