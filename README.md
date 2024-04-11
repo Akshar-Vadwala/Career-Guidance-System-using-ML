@@ -12,7 +12,7 @@ The system workflow involves:
 3. Filling out an interest survey form.
 4. Display of scores and prediction of the recommended stream by the ML model.
 
-The computer adaptive quiz question dataset is created by compiling questions from the internet and fine-tuning them for preferred use.
+The computer adaptive quiz question dataset is curated by compiling questions sourced from the internet and refining them to suit our needs. Additionally, a portion of the training dataset for the ML model is gathered through student surveys,ensuring the dataset's accuracy and relevance.
 
 ## Tech Stack
 
