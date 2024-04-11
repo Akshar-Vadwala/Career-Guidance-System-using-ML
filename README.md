@@ -61,7 +61,7 @@ The computer adaptive quiz question dataset is curated by compiling questions so
 Contributions to this project are welcome! Here's how you can help:
 
 - Use the project for testing and provide feedback on its functionality and user experience.
-- Improve the training dataset by suggesting additional questions or refining existing ones.
+- Enhance the training dataset by participating in quizzes and supplementing the question dataset with additional questions or refining existing ones.
 - Report any bugs or issues you encounter while using the application.
 - Enhance the codebase by fixing bugs, optimizing performance, or adding new features.
 
