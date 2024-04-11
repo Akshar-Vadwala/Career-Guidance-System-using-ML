@@ -15,6 +15,12 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.result{
+    padding: 10px;
+    text-align: center;
+    background-color: #ffffff;
+}
+
 h1 {
     color: #4caf50;
 }
@@ -22,7 +28,7 @@ h1 {
 p {
     font-size: 18px;
     margin-bottom: 20px;
-    text-align: justify;
+    text-align: center;
 }
 
 .btn {

@@ -538,8 +538,10 @@ def show_prediction():
         else:
             stream = "Arts"
             content= "3"
-
+        
+        email=session.get('email')
         session.clear()
+        session['email'] = email
         
         return render_template('show_prediction.html', stream=stream, content=content)
     else:
